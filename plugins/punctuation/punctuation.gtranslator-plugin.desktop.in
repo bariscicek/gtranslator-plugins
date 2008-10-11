@@ -1,0 +1,8 @@
+[Gtranslator Plugin]
+Module=punctuation
+IAge=2
+_Name=Punctuation
+_Description=Checks end of strings for punctuations
+Authors=Baris Cicek <baris@teamforce.name.tr>
+Copyright=Copyright @ 2008 Baris Cicek
+Website=http://gtranslator.sf.net

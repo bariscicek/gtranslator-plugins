@@ -1,0 +1,11 @@
+gtranslator-plugins
+-------------------
+
+This project aims to hold collection of useful, additional plugins to gtranslator (gtranslator.sourceforge.net). 
+
+List of current plugins:
+* punctuation: Checks the last character of translations so as to compare them for punctuation equality (ie. both strings ends with dot etc.) It has extra features such as ignoring tags and detecting three dots.
+
+* spell: Spell check current translation and whole po file using enchant spell checking library similar to gedit. 
+
+

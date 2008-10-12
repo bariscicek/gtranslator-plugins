@@ -1,0 +1,9 @@
+[Gtranslator Plugin]
+Module=spell
+IAge=2
+_Name=Spell Checker
+_Description=Checks the spelling of the entries.
+Icon=gtk-spell-check
+Authors=Baris Cicek <baris@teamforce.name.tr>
+Copyright=Copyright © 2008 Baris Cicek
+Website=http://gtranslator.sourceforge.net

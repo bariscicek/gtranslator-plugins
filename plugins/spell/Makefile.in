@@ -50,7 +50,8 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(plugindir)"
 pluginLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(plugin_LTLIBRARIES)
-libspell_la_DEPENDENCIES =
+am__DEPENDENCIES_1 =
+libspell_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libspell_la_OBJECTS = gtranslator-spell-plugin.lo \
 	gtranslator-spell-checker.lo \
 	gtranslator-automatic-spell-checker.lo
@@ -106,6 +107,9 @@ ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
+ENCHANGE_REQUIRED = @ENCHANGE_REQUIRED@
+ENCHANT_CFLAGS = @ENCHANT_CFLAGS@
+ENCHANT_LIBS = @ENCHANT_LIBS@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@

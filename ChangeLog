@@ -1,0 +1,7 @@
+2008-10-12  Baris Cicek  <baris@teamforce.name.tr>
+
+	* configure.ac: Addded enchant >= 1.2 requirement
+
+2008-10-11  Baris Cicek  <baris@teamforce.name.tr>
+
+	* configure.ac: Added spell plugin

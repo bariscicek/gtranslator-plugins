@@ -43,15 +43,29 @@ AM_GLIB_GNU_GETTEXT
 # ================================================================
 # Start of pkg-config checks
 # ================================================================
+GCONF_REQUIRED=2.18.0
+GTRANSLATOR_REQUIRED=1.9
+ENCHANT_REQUIRED=1.2.0
 
+AC_SUBST(GCONF_REQUIRED)
+AC_SUBST(GTRANSLATOR_REQUIRED)
+AC_SUBST(ENCHANGE_REQUIRED)
 
 PKG_CHECK_MODULES(GTRANSLATOR,[ 
-    gtranslator-2.0 >= 1.9
+gtranslator-2.0 >= $GTRANSLATOR_REQUIRED
+gconf-2.0 >= $GCONF_REQUIRED
+enchant >= $ENCHANT_REQUIRED
 ])
 
 GTRANSLATOR_LIBS="${GTRANSLATOR_LIBS}"
+GTRANSLATOR_CFLAGS="${GTRANSLATOR_CFLAGS}"
+ENCHANT_LIBS="${ENCHANT_LIBS}"
+ENCHANT_CFLAGS="${ENCHANT_CFLAGS}"
+
 AC_SUBST(GTRANSLATOR_LIBS)
 AC_SUBST(GTRANSLATOR_CFLAGS)
+AC_SUBST(ENCHANT_LIBS)
+AC_SUBST(ENCHANT_CFLAGS)
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -67,7 +81,7 @@ AC_ARG_WITH(all-plugins,
 
 if test "x$plugins" = xall
 then
-  plugins="punctuation"
+  plugins="punctuation spell"
 fi
 
 AC_SUBST([BUILD_PLUGINS], [$plugins])
@@ -75,6 +89,7 @@ AC_SUBST([BUILD_PLUGINS], [$plugins])
 
 AC_CONFIG_FILES([Makefile
                  plugins/Makefile
-                 plugins/punctuation/Makefile])
+                 plugins/punctuation/Makefile
+                 plugins/spell/Makefile])
 AC_OUTPUT
 

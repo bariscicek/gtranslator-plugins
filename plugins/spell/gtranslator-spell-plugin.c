@@ -263,7 +263,7 @@ get_current_word (GtkTextBuffer *doc, gint *start, gint *end)
 	*start = gtk_text_iter_get_offset (&current_iter);
 	*end = MIN (gtk_text_iter_get_offset (&end_iter), range_end);
 
-	g_warning (DEBUG_PLUGINS, "Current word extends [%d, %d]", *start, *end);
+	g_warning ("Current word extends [%d, %d]", *start, *end);
 
 	if (!(*start < *end))
 		return NULL;
@@ -280,10 +280,12 @@ goto_next_word (GtkTextBuffer *doc)
 	GtkTextIter current_iter;
 	GtkTextIter old_current_iter;
 	GtkTextIter end_iter;
+	gint cursor_position;
 
 	g_return_val_if_fail (doc != NULL, FALSE);
 
-	gtk_text_buffer_get_iter_at_offset (doc, &current_iter, doc->cursor_position);
+	g_object_get (G_OBJECT(doc), "cursor-position", &cursor_position, NULL);
+	gtk_text_buffer_get_iter_at_offset (doc, &current_iter, cursor_position);
 	gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (doc), &end_iter);
 
 	if (gtk_text_iter_compare (&current_iter, &end_iter) >= 0)
@@ -309,6 +311,7 @@ get_next_misspelled_word (GtranslatorView *view)
 {
 	GtkTextBuffer *doc;
 	GtranslatorTab *tab;
+	GtranslatorWindow *window;
 	gint start, end;
 	gchar *word;
 	GtranslatorSpellChecker *spell;
@@ -318,7 +321,9 @@ get_next_misspelled_word (GtranslatorView *view)
 	doc = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
 	g_return_val_if_fail (doc != NULL, NULL);
 
-	tab = gtranslator_application_get_active_tab ();
+	window = gtranslator_application_get_active_window (GTR_APP);
+	tab = gtranslator_window_get_active_tab (window);
+	g_return_val_if_fail (tab != NULL, NULL);
 	
 	spell = get_spell_checker_from_tab (tab);
 	g_return_val_if_fail (spell != NULL, NULL);
@@ -339,37 +344,66 @@ get_next_misspelled_word (GtranslatorView *view)
 		if (word == NULL)
 			return NULL;
 
-		gedit_debug_message (DEBUG_PLUGINS, "Word to check: %s", word);
+		g_warning ("Word to check: %s", word);
 	}
 
 	if (!goto_next_word (doc))
-		update_current (doc, gtk_text_buffer_get_char_count (GTK_TEXT_BUFFER (doc)));
+//		update_current (doc, gtk_text_buffer_get_char_count (GTK_TEXT_BUFFER (doc)));
 
 	if (word != NULL)
 	{
 		GtkTextIter s, e;
-
+/*
 		range->mw_start = start;
 		range->mw_end = end;
-
-		gedit_debug_message (DEBUG_PLUGINS, "Select [%d, %d]", start, end);
+*/
+		g_warning ("Select [%d, %d]", start, end);
 
 		gtk_text_buffer_get_iter_at_offset (GTK_TEXT_BUFFER (doc), &s, start);
 		gtk_text_buffer_get_iter_at_offset (GTK_TEXT_BUFFER (doc), &e, end);
 
 		gtk_text_buffer_select_range (GTK_TEXT_BUFFER (doc), &s, &e);
 
-		gedit_view_scroll_to_cursor (view);
+//		gedit_view_scroll_to_cursor (view);
 	}
 	else
 	{
+		/*
 		range->mw_start = -1;
 		range->mw_end = -1;
+		 */
 	}
 
 	return word;
 }
 
+
+static void
+ignore_cb (GtranslatorSpellCheckerDialog *dlg,
+		   const gchar *w,
+		   GtranslatorView *view)
+{
+	gchar *word = NULL;
+
+	
+	g_return_if_fail (w != NULL);
+	g_return_if_fail (view != NULL);
+
+	word = get_next_misspelled_word (view);
+	if (word == NULL)
+	{
+//		gedit_spell_checker_dialog_set_completed (dlg);
+		
+		return;
+	}
+
+	gtranslator_spell_checker_dialog_set_misspelled_word (GTRANSLATOR_SPELL_CHECKER_DIALOG (dlg),
+							word,
+							-1);
+
+	g_free (word);
+		
+}
 
 
 static void
@@ -413,23 +447,21 @@ check_spelling_cb (GtkAction	*action,
 	}
 	
 	*/
+	word = get_next_misspelled_word (view);
+	
 	
 	dlg = gtranslator_spell_checker_dialog_new_from_spell_checker (spell);
 	gtk_window_set_modal (GTK_WINDOW (dlg), TRUE);
 	gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (window));
 	
+	gtranslator_spell_checker_dialog_set_misspelled_word (GTRANSLATOR_SPELL_CHECKER_DIALOG (dlg),
+							word,
+							-1);
 	g_signal_connect (dlg, "ignore", G_CALLBACK (ignore_cb), view);
 	
+	
+	
 	gtk_widget_show (dlg);
-}
-
-
-static void
-ignore_cb (GtranslatorSpellCheckerDialog *dlg,
-		   const gchar *w,
-		   GtranslatorView *view)
-{
-		
 }
 
 static void

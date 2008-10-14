@@ -722,19 +722,19 @@ gtranslator_automatic_spell_checker_new (GtkTextBuffer     *doc,
 				 spell, 
 				 (GDestroyNotify)gtranslator_automatic_spell_checker_free_internal);
 
-	g_signal_connect (tab,
+	g_signal_connect (doc,
 			  "insert-text",
 			  G_CALLBACK (insert_text_before), 
 			  spell);
-	g_signal_connect_after (tab,
+	g_signal_connect_after (doc,
 			  "insert-text",
 			  G_CALLBACK (insert_text_after), 
 			  spell);
-	g_signal_connect_after (tab,
+	g_signal_connect_after (doc,
 			  "delete-range",
 			  G_CALLBACK (delete_range_after), 
 			  spell);
-	g_signal_connect (tab,
+	g_signal_connect (doc,
 			  "mark-set",
 			  G_CALLBACK (mark_set), 
 			  spell);

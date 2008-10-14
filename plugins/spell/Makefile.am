@@ -1,5 +1,6 @@
-# Alternate language plugin
+# spell plugin plugin
 plugindir = $(libdir)/gtranslator/plugins
+gladedir = $(libdir)/gtranslator/plugins/spell
 
 INCLUDES = \
 	-I$(top_srcdir) 				\
@@ -10,7 +11,8 @@ INCLUDES = \
 	$(GTRANSLATOR_CFLAGS) 				\
 	$(WARN_CFLAGS)					\
 	$(DISABLE_DEPRECATED_CFLAGS)			\
-	-DGTR_LOCALEDIR=\""$(prefix)/$(DATADIRNAME)/locale"\"
+	-DGTR_LOCALEDIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
+	-DGTR_GLADEDIR=\""$(gladedir)"\" 
 
 plugin_LTLIBRARIES = \
 	libspell.la
@@ -20,14 +22,18 @@ libspell_la_SOURCES = \
 	gtranslator-spell-plugin.h \
 	gtranslator-spell-checker.c \
 	gtranslator-spell-checker.h \
+	gtranslator-spell-checker-dialog.c \
+	gtranslator-spell-checker-dialog.h \
 	gtranslator-automatic-spell-checker.c \
 	gtranslator-automatic-spell-checker.h
-
 
 libspell_la_LDFLAGS = \
 	$(PLUGIN_LIBTOOL_FLAGS)				\
 	$(GTRANSLATOR_LIBS)
+
 libspell_la_LIBADD  = $(ENCHANT_LIBS)
+
+glade_DATA = spell-checker.glade
 
 # Plugin Info
 
@@ -37,7 +43,9 @@ libspell_la_LIBADD  = $(ENCHANT_LIBS)
 
 #plugin_DATA = $(plugin_in_files:.gtranslator-plugin.desktop.in=.gtranslator.plugin)
 
-EXTRA_DIST = $(plugin_in_files)
+EXTRA_DIST = \
+	$(plugin_in_files) \
+	$(glade_DATA)
 
 CLEANFILES = $(plugin_DATA)
 DISTCLEANFILES = $(plugin_DATA)

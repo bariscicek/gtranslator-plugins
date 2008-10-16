@@ -2,6 +2,10 @@
 plugindir = $(libdir)/gtranslator/plugins
 gladedir = $(libdir)/gtranslator/plugins/spell
 
+BUILT_SOURCES=		\
+	gtranslator-spell-checker-dialog-marshal.c	\
+	gtranslator-spell-checker-dialog-marshal.h
+
 INCLUDES = \
 	-I$(top_srcdir) 				\
 	-I$(top_srcdir)/src				\
@@ -34,6 +38,12 @@ libspell_la_LDFLAGS = \
 libspell_la_LIBADD  = $(ENCHANT_LIBS)
 
 glade_DATA = spell-checker.glade
+
+gtranslator-spell-checker-dialog-marshal.h: gtranslator-spell-checker-dialog-marshal.list $(GLIB_GENMARSHAL)
+		$(GLIB_GENMARSHAL) $< --header --prefix=gtranslator_marshal > $@
+
+gtranslator-spell-checker-dialog-marshal.c: gtranslator-spell-checker-dialog-marshal.list $(GLIB_GENMARSHAL)
+		echo "#include \"gtranslator-spell-checker-dialog-marshal.h\"" > $@ && $(GLIB_GENMARSHAL) $< --body --prefix=gtranslator_marshal >> $@
 
 # Plugin Info
 

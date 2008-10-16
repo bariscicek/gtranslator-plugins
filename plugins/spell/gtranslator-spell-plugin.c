@@ -61,6 +61,8 @@ GTR_PLUGIN_REGISTER_TYPE(GtranslatorSpellPlugin, gtranslator_spell_plugin)
 static void	auto_spell_cb	(GtkAction *action, GtranslatorWindow *window);
 static void	check_spelling_cb	(GtkAction *action, GtranslatorWindow *window);
 
+static GtkTextMark *current_mark;
+
 struct _GtranslatorSpellPluginPrivate
 {
 	GConfClient		*gconf_client;
@@ -245,15 +247,21 @@ get_current_word (GtkTextBuffer *doc, gint *start, gint *end)
 	GtkTextIter end_iter;
 	GtkTextIter current_iter;
 	gint range_end;
+	gint cursor_position;
 
 	g_return_val_if_fail (doc != NULL, NULL);
 	g_return_val_if_fail (start != NULL, NULL);
 	g_return_val_if_fail (end != NULL, NULL);
-
-	gtk_text_buffer_get_bounds (doc, &current_iter, &end_iter);
+	
+	gtk_text_buffer_get_iter_at_mark (doc, &current_iter, current_mark);
+	end_iter = current_iter;
 	
 	range_end = gtk_text_iter_get_offset (&end_iter);
 
+	if (!gtk_text_iter_is_start (&current_iter))
+	{
+		gtk_text_iter_backward_word_start (&current_iter);
+	}
 
 	if (!gtk_text_iter_is_end (&end_iter))
 	{
@@ -261,13 +269,15 @@ get_current_word (GtkTextBuffer *doc, gint *start, gint *end)
 	}
 
 	*start = gtk_text_iter_get_offset (&current_iter);
-	*end = MIN (gtk_text_iter_get_offset (&end_iter), range_end);
+	*end = MAX (gtk_text_iter_get_offset (&end_iter), range_end);
 
+	gtk_text_buffer_move_mark (doc, current_mark, &end_iter);
+							   
 	g_warning ("Current word extends [%d, %d]", *start, *end);
-
+/*
 	if (!(*start < *end))
 		return NULL;
-
+*/
 	return gtk_text_buffer_get_slice (GTK_TEXT_BUFFER (doc),
 					  &current_iter,
 					  &end_iter,
@@ -449,7 +459,6 @@ check_spelling_cb (GtkAction	*action,
 	*/
 	word = get_next_misspelled_word (view);
 	
-	
 	dlg = gtranslator_spell_checker_dialog_new_from_spell_checker (spell);
 	gtk_window_set_modal (GTK_WINDOW (dlg), TRUE);
 	gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (window));
@@ -503,9 +512,19 @@ showed_message_cb (GtranslatorTab *tab,
 				   GtranslatorMsg *msg,
 		   		GtranslatorWindow *window)
 {
+	GtkTextBuffer *buffer;
+	GtranslatorView *view;
+	GtkTextIter iter;
+	
 	GtranslatorAutomaticSpellChecker *autospell;
 	
 	autospell = gtranslator_automatic_spell_checker_get_from_tab (tab);
+	
+	view = gtranslator_tab_get_active_view (tab);
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
+	gtk_text_buffer_get_start_iter (buffer, &iter);
+	
+	current_mark = gtk_text_buffer_create_mark (buffer, NULL, &iter, TRUE);
 	
 	if (autospell != NULL) 
 		gtranslator_automatic_spell_checker_recheck_all (autospell);

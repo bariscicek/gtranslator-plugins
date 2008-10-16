@@ -36,7 +36,7 @@
 #include <gtk/gtk.h>
 #include <gtranslator/utils.h>
 #include "gtranslator-spell-checker-dialog.h"
-//#include "gtranslator-spell-checker-dialog-marshal.h"
+#include "gtranslator-spell-checker-dialog-marshal.h"
 
 struct _GtranslatorSpellCheckerDialog 
 {
@@ -155,7 +155,7 @@ gtranslator_spell_checker_dialog_class_init (GtranslatorSpellCheckerDialogClass 
 	*/
 
 	GTK_OBJECT_CLASS (object_class)->destroy = gtranslator_spell_checker_dialog_destroy;
-/*
+
 	signals [IGNORE] = 
 		g_signal_new ("ignore",
  			      G_OBJECT_CLASS_TYPE (object_class),
@@ -177,7 +177,7 @@ gtranslator_spell_checker_dialog_class_init (GtranslatorSpellCheckerDialogClass 
 			      G_TYPE_NONE, 
 			      1, 
 			      G_TYPE_STRING);
-
+/*
 	signals [CHANGE] = 
 		g_signal_new ("change",
  			      G_OBJECT_CLASS_TYPE (object_class),
@@ -212,7 +212,7 @@ gtranslator_spell_checker_dialog_class_init (GtranslatorSpellCheckerDialogClass 
 			      G_TYPE_NONE, 
 			      1, 
 			      G_TYPE_STRING);
-	 */
+	*/ 
 }
 
 static void

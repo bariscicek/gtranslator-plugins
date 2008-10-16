@@ -120,6 +120,7 @@ FFLAGS = @FFLAGS@
 GCONFTOOL = @GCONFTOOL@
 GCONF_REQUIRED = @GCONF_REQUIRED@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
+GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
@@ -225,6 +226,10 @@ top_srcdir = @top_srcdir@
 # spell plugin plugin
 plugindir = $(libdir)/gtranslator/plugins
 gladedir = $(libdir)/gtranslator/plugins/spell
+BUILT_SOURCES = \
+	gtranslator-spell-checker-dialog-marshal.c	\
+	gtranslator-spell-checker-dialog-marshal.h
+
 INCLUDES = \
 	-I$(top_srcdir) 				\
 	-I$(top_srcdir)/src				\
@@ -270,7 +275,8 @@ EXTRA_DIST = \
 
 CLEANFILES = $(plugin_DATA)
 DISTCLEANFILES = $(plugin_DATA)
-all: all-am
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -462,13 +468,15 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LTLIBRARIES) $(DATA)
 installdirs:
 	for dir in "$(DESTDIR)$(plugindir)" "$(DESTDIR)$(gladedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -494,6 +502,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-generic clean-libtool clean-pluginLTLIBRARIES \
@@ -570,6 +579,12 @@ uninstall-am: uninstall-gladeDATA uninstall-pluginLTLIBRARIES
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-gladeDATA uninstall-pluginLTLIBRARIES
 
+
+gtranslator-spell-checker-dialog-marshal.h: gtranslator-spell-checker-dialog-marshal.list $(GLIB_GENMARSHAL)
+		$(GLIB_GENMARSHAL) $< --header --prefix=gtranslator_marshal > $@
+
+gtranslator-spell-checker-dialog-marshal.c: gtranslator-spell-checker-dialog-marshal.list $(GLIB_GENMARSHAL)
+		echo "#include \"gtranslator-spell-checker-dialog-marshal.h\"" > $@ && $(GLIB_GENMARSHAL) $< --body --prefix=gtranslator_marshal >> $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

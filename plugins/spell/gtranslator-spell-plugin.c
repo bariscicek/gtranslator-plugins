@@ -294,8 +294,7 @@ goto_next_word (GtkTextBuffer *doc)
 
 	g_return_val_if_fail (doc != NULL, FALSE);
 
-	g_object_get (G_OBJECT(doc), "cursor-position", &cursor_position, NULL);
-	gtk_text_buffer_get_iter_at_offset (doc, &current_iter, cursor_position);
+	gtk_text_buffer_get_iter_at_mark (doc, &current_iter, current_mark);
 	gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (doc), &end_iter);
 
 	if (gtk_text_iter_compare (&current_iter, &end_iter) >= 0)
@@ -357,7 +356,7 @@ get_next_misspelled_word (GtranslatorView *view)
 		g_warning ("Word to check: %s", word);
 	}
 
-	if (!goto_next_word (doc))
+//	if (!goto_next_word (doc))
 //		update_current (doc, gtk_text_buffer_get_char_count (GTK_TEXT_BUFFER (doc)));
 
 	if (word != NULL)

@@ -172,8 +172,6 @@ get_spell_checker_from_tab (GtranslatorTab *tab)
 			
 			value = gtranslator_spell_checker_set_language (spell, key);
 
-			g_object_unref (profile);	
-			
 		}
 
 		g_object_set_qdata_full (G_OBJECT (tab), 

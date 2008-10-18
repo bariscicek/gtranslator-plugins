@@ -257,6 +257,7 @@ update_current (GtkTextBuffer *doc,
 		/* if we're not inside a word,
 		 * we must be in some spaces.
 		 * skip forward to the beginning of the next word. */
+
 		if (!gtk_text_iter_is_end (&iter))
 		{
 			gtk_text_iter_forward_word_end (&iter);
@@ -268,7 +269,7 @@ update_current (GtkTextBuffer *doc,
 		if (!gtk_text_iter_starts_word (&iter))
 			gtk_text_iter_backward_word_start (&iter);	
 	}
-
+	 
 	gtk_text_buffer_move_mark (GTK_TEXT_BUFFER (doc),
 					   current_mark,
 					   &iter);
@@ -281,7 +282,6 @@ get_current_word (GtkTextBuffer *doc, gint *start, gint *end)
 {
 	GtkTextIter end_iter;
 	GtkTextIter current_iter;
-	gint range_end;
 	gint cursor_position;
 
 	g_return_val_if_fail (doc != NULL, NULL);
@@ -289,9 +289,12 @@ get_current_word (GtkTextBuffer *doc, gint *start, gint *end)
 	g_return_val_if_fail (end != NULL, NULL);
 	
 	gtk_text_buffer_get_iter_at_mark (doc, &current_iter, current_mark);
-	end_iter = current_iter;
+	gtk_text_buffer_get_end_iter (doc, &end_iter);
+	if (gtk_text_iter_compare (&end_iter, &current_iter) <= 0)
+		return NULL;
+	else
+		end_iter = current_iter;
 	
-	range_end = gtk_text_iter_get_offset (&end_iter);
 
 	if (!gtk_text_iter_is_start (&current_iter) && !gtk_text_iter_starts_word (&current_iter))
 	{
@@ -304,7 +307,7 @@ get_current_word (GtkTextBuffer *doc, gint *start, gint *end)
 	}
 
 	*start = gtk_text_iter_get_offset (&current_iter);
-	*end = MAX (gtk_text_iter_get_offset (&end_iter), range_end);
+	*end = gtk_text_iter_get_offset (&end_iter);
 
 	gtk_text_buffer_move_mark (doc, current_mark, &end_iter);
 							   
@@ -414,7 +417,12 @@ get_next_misspelled_word (GtranslatorView *view)
 
 		gtk_text_buffer_select_range (GTK_TEXT_BUFFER (doc), &s, &e);
 
-//		gedit_view_scroll_to_cursor (view);
+		gtk_text_view_scroll_to_iter (GTK_TEXT_VIEW (view),
+									  &e,
+									  0.0,
+									  FALSE,
+									  0.0,
+									  0.0);
 	}
 	else
 	{
@@ -438,7 +446,7 @@ ignore_cb (GtranslatorSpellCheckerDialog *dlg,
 	
 	g_return_if_fail (w != NULL);
 	g_return_if_fail (view != NULL);
-
+	
 	word = get_next_misspelled_word (view);
 	if (word == NULL)
 	{

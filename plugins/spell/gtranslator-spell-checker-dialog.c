@@ -35,6 +35,8 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 #include <gtranslator/utils.h>
+#include <gtranslator/application.h>
+#include <gtranslator/profile.h>
 #include "gtranslator-spell-checker-dialog.h"
 #include "gtranslator-spell-checker-dialog-marshal.h"
 
@@ -386,6 +388,7 @@ void
 gtranslator_spell_checker_dialog_set_spell_checker (GtranslatorSpellCheckerDialog *dlg, GtranslatorSpellChecker *spell)
 {
 	const gchar *lang;
+	GtranslatorProfile *profile;
 	gchar *tmp;
 	
 	g_return_if_fail (GTRANSLATOR_IS_SPELL_CHECKER_DIALOG (dlg));
@@ -397,9 +400,10 @@ gtranslator_spell_checker_dialog_set_spell_checker (GtranslatorSpellCheckerDialo
 	dlg->spell_checker = spell;
 	g_object_ref (dlg->spell_checker);
 	
-
-	//lang = gtranslator_spell_checker_language_to_string (language);
-	tmp = g_strdup_printf("<b>TODO</b>");
+	profile = gtranslator_application_get_active_profile (GTR_APP);
+	
+	lang = gtranslator_profile_get_language_name (profile);
+	tmp = g_strdup_printf("<b>%s</b>", lang);
 
 	gtk_label_set_label (GTK_LABEL (dlg->language_label), tmp);
 	g_free (tmp);

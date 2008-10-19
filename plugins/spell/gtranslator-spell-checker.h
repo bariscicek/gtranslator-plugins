@@ -98,7 +98,7 @@ gboolean		 gtranslator_spell_checker_set_correction 	(GtranslatorSpellChecker   
 								 gssize                           r_len);
 
 gboolean			gtranslator_spell_checker_set_language (GtranslatorSpellChecker               *spell,
-									gchar *language);
+									const gchar *language);
 G_END_DECLS
 
 #endif  /* __GTRANSLATOR_SPELL_CHECKER_H__ */

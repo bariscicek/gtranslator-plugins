@@ -458,7 +458,7 @@ is_digit (const char *text, gssize length)
 
 gboolean
 gtranslator_spell_checker_set_language (GtranslatorSpellChecker               *spell,
-				  gchar *language)
+				  const gchar *language)
 {
 	gboolean ret;
 

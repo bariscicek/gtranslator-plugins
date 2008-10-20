@@ -196,7 +196,7 @@ gtranslator_spell_checker_dialog_class_init (GtranslatorSpellCheckerDialogClass 
 			      G_TYPE_NONE, 
 			      1, 
 			      G_TYPE_STRING);
-/*
+
 	signals [CHANGE] = 
 		g_signal_new ("change",
  			      G_OBJECT_CLASS_TYPE (object_class),
@@ -231,7 +231,7 @@ gtranslator_spell_checker_dialog_class_init (GtranslatorSpellCheckerDialogClass 
 			      G_TYPE_NONE, 
 			      1, 
 			      G_TYPE_STRING);
-	*/ 
+	
 }
 
 static void

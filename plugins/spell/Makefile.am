@@ -29,7 +29,9 @@ libspell_la_SOURCES = \
 	gtranslator-spell-checker-dialog.c \
 	gtranslator-spell-checker-dialog.h \
 	gtranslator-automatic-spell-checker.c \
-	gtranslator-automatic-spell-checker.h
+	gtranslator-automatic-spell-checker.h \
+	gtranslator-spell-checker-dialog-marshal.c \
+	gtranslator-spell-checker-dialog-marshal.h
 
 libspell_la_LDFLAGS = \
 	$(PLUGIN_LIBTOOL_FLAGS)				\

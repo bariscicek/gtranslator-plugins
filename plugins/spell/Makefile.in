@@ -56,7 +56,8 @@ libspell_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libspell_la_OBJECTS = gtranslator-spell-plugin.lo \
 	gtranslator-spell-checker.lo \
 	gtranslator-spell-checker-dialog.lo \
-	gtranslator-automatic-spell-checker.lo
+	gtranslator-automatic-spell-checker.lo \
+	gtranslator-spell-checker-dialog-marshal.lo
 libspell_la_OBJECTS = $(am_libspell_la_OBJECTS)
 libspell_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -253,7 +254,9 @@ libspell_la_SOURCES = \
 	gtranslator-spell-checker-dialog.c \
 	gtranslator-spell-checker-dialog.h \
 	gtranslator-automatic-spell-checker.c \
-	gtranslator-automatic-spell-checker.h
+	gtranslator-automatic-spell-checker.h \
+	gtranslator-spell-checker-dialog-marshal.c \
+	gtranslator-spell-checker-dialog-marshal.h
 
 libspell_la_LDFLAGS = \
 	$(PLUGIN_LIBTOOL_FLAGS)				\
@@ -346,6 +349,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtranslator-automatic-spell-checker.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtranslator-spell-checker-dialog-marshal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtranslator-spell-checker-dialog.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtranslator-spell-checker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtranslator-spell-plugin.Plo@am__quote@

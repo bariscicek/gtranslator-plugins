@@ -466,6 +466,34 @@ ignore_all_cb (GtranslatorSpellCheckerDialog *dlg,
 }
 
 static void
+learn_cb (GtranslatorSpellCheckerDialog *dlg,
+			   const gchar *w,
+			   GtranslatorView *view)
+{
+	gchar *word = NULL;
+	GtranslatorSpellChecker *spell;
+	
+	g_return_if_fail (w != NULL);
+	g_return_if_fail (view != NULL);
+	
+	spell = gtranslator_spell_checker_dialog_get_spell_checker (dlg);
+	
+	/* Add word to current session */
+	gtranslator_spell_checker_add_word_to_personal (spell,
+												    w,
+												    -1);
+	
+	word = get_next_misspelled_word (dlg, view);
+	
+	gtranslator_spell_checker_dialog_set_misspelled_word (GTRANSLATOR_SPELL_CHECKER_DIALOG (dlg),
+														  word,
+														  -1);
+	g_free (word);
+}
+
+
+
+static void
 check_spelling_cb (GtkAction	*action,
 				   GtranslatorWindow	*window)
 {
@@ -507,6 +535,10 @@ check_spelling_cb (GtkAction	*action,
 	g_signal_connect (dlg, 
 					  "ignore_all", 
 					  G_CALLBACK (ignore_all_cb), 
+					  view);
+	g_signal_connect (dlg,
+					  "add_word_to_personal",
+					  G_CALLBACK (learn_cb),
 					  view);
 	
 	gtk_widget_show (dlg);

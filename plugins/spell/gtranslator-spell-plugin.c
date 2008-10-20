@@ -223,21 +223,20 @@ auto_spell_cb (GtkAction   *action,
 	{
 		if (autospell == NULL)
 		{
-			GtranslatorView *active_view;
-
-			active_view = gtranslator_window_get_active_view (window);
-			g_return_if_fail (active_view != NULL);
-
 			autospell = gtranslator_automatic_spell_checker_new (doc, tab, spell);
-			gtranslator_automatic_spell_checker_recheck_all (autospell);
-		} else { 
-			gtranslator_automatic_spell_checker_recheck_all (autospell);
-		}
+			g_return_if_fail (autospell != NULL);
+		} 
+		
+		gtranslator_automatic_spell_checker_recheck_all (autospell);
+		/* Add ui elements for view */
+		gtranslator_automatic_spell_checker_attach_view (autospell, view);
 	}
 	else
 	{
 		if (autospell != NULL)
 			gtranslator_automatic_spell_checker_free (autospell);
+		
+		gtranslator_automatic_spell_checker_detach_view (autospell, view);
 	}
 }
 
@@ -678,6 +677,12 @@ showed_message_cb (GtranslatorTab *tab,
 	
 	if (autospell != NULL) 
 	{
+		GtranslatorView *active_view; 
+		
+		active_view = gtranslator_window_get_active_view (window);
+		g_return_if_fail (active_view != NULL);
+		
+		gtranslator_automatic_spell_checker_attach_view (autospell, active_view);
 		gtranslator_automatic_spell_checker_recheck_all (autospell);
 	}
 	

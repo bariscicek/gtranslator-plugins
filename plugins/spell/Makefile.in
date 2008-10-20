@@ -57,7 +57,7 @@ am_libspell_la_OBJECTS = gtranslator-spell-plugin.lo \
 	gtranslator-spell-checker.lo \
 	gtranslator-spell-checker-dialog.lo \
 	gtranslator-automatic-spell-checker.lo \
-	gtranslator-spell-checker-dialog-marshal.lo
+	gtranslator-spell-checker-marshal.lo
 libspell_la_OBJECTS = $(am_libspell_la_OBJECTS)
 libspell_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -228,8 +228,8 @@ top_srcdir = @top_srcdir@
 plugindir = $(libdir)/gtranslator/plugins
 gladedir = $(libdir)/gtranslator/plugins/spell
 BUILT_SOURCES = \
-	gtranslator-spell-checker-dialog-marshal.c	\
-	gtranslator-spell-checker-dialog-marshal.h
+	gtranslator-spell-checker-marshal.c	\
+	gtranslator-spell-checker-marshal.h
 
 INCLUDES = \
 	-I$(top_srcdir) 				\
@@ -255,8 +255,8 @@ libspell_la_SOURCES = \
 	gtranslator-spell-checker-dialog.h \
 	gtranslator-automatic-spell-checker.c \
 	gtranslator-automatic-spell-checker.h \
-	gtranslator-spell-checker-dialog-marshal.c \
-	gtranslator-spell-checker-dialog-marshal.h
+	gtranslator-spell-checker-marshal.c \
+	gtranslator-spell-checker-marshal.h
 
 libspell_la_LDFLAGS = \
 	$(PLUGIN_LIBTOOL_FLAGS)				\
@@ -349,8 +349,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtranslator-automatic-spell-checker.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtranslator-spell-checker-dialog-marshal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtranslator-spell-checker-dialog.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtranslator-spell-checker-marshal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtranslator-spell-checker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtranslator-spell-plugin.Plo@am__quote@
 
@@ -584,11 +584,11 @@ uninstall-am: uninstall-gladeDATA uninstall-pluginLTLIBRARIES
 	uninstall-gladeDATA uninstall-pluginLTLIBRARIES
 
 
-gtranslator-spell-checker-dialog-marshal.h: gtranslator-spell-checker-dialog-marshal.list $(GLIB_GENMARSHAL)
+gtranslator-spell-checker-marshal.h: gtranslator-spell-checker-marshal.list $(GLIB_GENMARSHAL)
 		$(GLIB_GENMARSHAL) $< --header --prefix=gtranslator_marshal > $@
 
-gtranslator-spell-checker-dialog-marshal.c: gtranslator-spell-checker-dialog-marshal.list $(GLIB_GENMARSHAL)
-		echo "#include \"gtranslator-spell-checker-dialog-marshal.h\"" > $@ && $(GLIB_GENMARSHAL) $< --body --prefix=gtranslator_marshal >> $@
+gtranslator-spell-checker-marshal.c: gtranslator-spell-checker-marshal.list $(GLIB_GENMARSHAL)
+		echo "#include \"gtranslator-spell-checker-marshal.h\"" > $@ && $(GLIB_GENMARSHAL) $< --body --prefix=gtranslator_marshal >> $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

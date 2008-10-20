@@ -40,6 +40,7 @@
 #include <glib/gstrfuncs.h>
 
 #include "gtranslator-spell-checker.h"
+#include "gtranslator-spell-checker-marshal.h"
 
 /* FIXME - Rename the marshal file - Paolo */
 
@@ -64,7 +65,6 @@ enum {
 enum {
 	ADD_WORD_TO_PERSONAL = 0,
 	ADD_WORD_TO_SESSION,
-	SET_LANGUAGE,
 	CLEAR_SESSION,
 	LAST_SIGNAL
 };
@@ -169,6 +169,39 @@ gtranslator_spell_checker_class_init (GtranslatorSpellCheckerClass * klass)
 						 	      "Language",
 							      "The language used by the spell checker",
 							      G_PARAM_READWRITE));
+	signals[ADD_WORD_TO_PERSONAL] =
+		g_signal_new ("add_word_to_personal",
+			      G_OBJECT_CLASS_TYPE (object_class),
+			      G_SIGNAL_RUN_LAST,
+			      G_STRUCT_OFFSET (GtranslatorSpellCheckerClass, add_word_to_personal),
+			      NULL, NULL,
+			      gtranslator_marshal_VOID__STRING_INT,
+			      G_TYPE_NONE,
+			      2,
+			      G_TYPE_STRING,
+			      G_TYPE_INT);
+	signals[ADD_WORD_TO_SESSION] =
+		g_signal_new ("add_word_to_session",
+      			G_OBJECT_CLASS_TYPE (object_class),
+      			G_SIGNAL_RUN_LAST,
+      			G_STRUCT_OFFSET (GtranslatorSpellCheckerClass, add_word_to_session),
+      			NULL, NULL,
+      			gtranslator_marshal_VOID__STRING_INT,
+      			G_TYPE_NONE,
+      			2,
+      			G_TYPE_STRING,
+      			G_TYPE_INT);
+	signals[CLEAR_SESSION] =
+		g_signal_new ("clear_session",
+      			G_OBJECT_CLASS_TYPE (object_class),
+      			G_SIGNAL_RUN_LAST,
+      			G_STRUCT_OFFSET (GtranslatorSpellCheckerClass, clear_session),
+      			NULL, NULL,
+      			gtranslator_marshal_VOID__VOID,
+      			G_TYPE_NONE,
+      			0);
+	
+
 
 }
 

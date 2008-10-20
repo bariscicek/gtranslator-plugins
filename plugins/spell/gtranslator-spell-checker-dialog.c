@@ -38,7 +38,7 @@
 #include <gtranslator/application.h>
 #include <gtranslator/profile.h>
 #include "gtranslator-spell-checker-dialog.h"
-#include "gtranslator-spell-checker-dialog-marshal.h"
+#include "gtranslator-spell-checker-marshal.h"
 
 struct _GtranslatorSpellCheckerDialog 
 {

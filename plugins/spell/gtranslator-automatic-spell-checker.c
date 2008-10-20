@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * gtranslator-automatic-spell-checker.c
- * This file is part of gtranslator
+ * This file is part of gtranslator-plugins
  *
  * Copyright (C) 2008 Baris Cicek
  *
@@ -751,11 +751,11 @@ gtranslator_automatic_spell_checker_new (GtkTextBuffer     *doc,
 			  "clear_session",
 			  G_CALLBACK (clear_session_cb),
 			  spell);
-	g_signal_connect (spell->spell_checker,
+	/*g_signal_connect (spell->spell_checker,
 			  "set_language",
 			  G_CALLBACK (set_language_cb),
 			  spell);
-
+	*/
 	spell->tag_highlight = gtk_text_buffer_create_tag (
 				GTK_TEXT_BUFFER (doc),
 				"gtkspell-misspelled",
@@ -927,7 +927,10 @@ gtranslator_automatic_spell_checker_attach_view (
 
 	g_return_if_fail (gtk_text_view_get_buffer (GTK_TEXT_VIEW (view)) ==
 			  GTK_TEXT_BUFFER (spell->doc));
-
+	
+	if (g_slist_find (spell->views, view) != NULL)
+		return;
+	
 	g_signal_connect (view,
 			  "button-press-event",
 			  G_CALLBACK (button_press_event), 

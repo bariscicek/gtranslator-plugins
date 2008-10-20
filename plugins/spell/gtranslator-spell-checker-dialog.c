@@ -48,6 +48,7 @@ struct _GtranslatorSpellCheckerDialog
 
 	gchar			*misspelled_word;
 
+	GtkWidget	        *message_preview;
 	GtkWidget 		*misspelled_word_label;
 	GtkWidget		*word_entry;
 	GtkWidget		*check_word_button;
@@ -79,6 +80,8 @@ enum
 	NUM_COLUMNS
 };
 
+
+GtranslatorSpellChecker*	gtranslator_spell_checker_dialog_get_spell_checker (GtranslatorSpellCheckerDialog *dlg);
 static void	gtranslator_spell_checker_dialog_class_init 		(GtranslatorSpellCheckerDialogClass * klass);
 static void	gtranslator_spell_checker_dialog_init 		(GtranslatorSpellCheckerDialog *spell_checker);
 static void	gtranslator_spell_checker_dialog_destroy 		(GtkObject *object);
@@ -141,6 +144,20 @@ gtranslator_spell_checker_dialog_get_type (void)
 	}
 
 	return gtranslator_spell_checker_dialog_type;
+}
+
+GtranslatorSpellChecker *
+gtranslator_spell_checker_dialog_get_spell_checker (GtranslatorSpellCheckerDialog *dlg)
+{
+	g_return_val_if_fail (dlg != NULL, NULL);
+	return dlg->spell_checker;
+}
+
+GtkTextView *
+gtranslator_spell_checker_dialog_get_view (GtranslatorSpellCheckerDialog *dlg)
+{
+	g_return_val_if_fail (dlg != NULL, NULL);
+	return GTK_TEXT_VIEW (dlg->message_preview);
 }
 
 static void
@@ -236,6 +253,7 @@ gtranslator_spell_checker_dialog_init (GtranslatorSpellCheckerDialog *dlg)
 		"content",
 		&error_widget,
 		"content", &content,
+		"message_preview1", &dlg->message_preview,
 		"misspelled_word_label1", &dlg->misspelled_word_label,
 		"word_entry1", &dlg->word_entry,
 		"check_word_button1", &dlg->check_word_button,

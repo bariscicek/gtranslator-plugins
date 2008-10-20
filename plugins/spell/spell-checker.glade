@@ -26,7 +26,7 @@
                 <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                 <property name="shadow_type">GTK_SHADOW_ETCHED_IN</property>
                 <child>
-                  <widget class="GtkTextView" id="textview1">
+                  <widget class="GtkTextView" id="message_preview1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                   </widget>

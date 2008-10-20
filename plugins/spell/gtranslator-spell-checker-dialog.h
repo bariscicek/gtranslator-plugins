@@ -74,6 +74,13 @@ GtkWidget		*gtranslator_spell_checker_dialog_new		(void);
 GtkWidget		*gtranslator_spell_checker_dialog_new_from_spell_checker 
 								(GtranslatorSpellChecker *spell);
 
+GtranslatorSpellChecker
+				 *gtranslator_spell_checker_dialog_get_spell_checker 
+								(GtranslatorSpellCheckerDialog *dlg);
+GtkTextView
+				 *gtranslator_spell_checker_dialog_get_view 
+								(GtranslatorSpellCheckerDialog *dlg);
+				 
 void 			 gtranslator_spell_checker_dialog_set_spell_checker
 								(GtranslatorSpellCheckerDialog *dlg,
 								 GtranslatorSpellChecker *spell);

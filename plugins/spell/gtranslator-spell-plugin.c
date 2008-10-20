@@ -242,234 +242,6 @@ auto_spell_cb (GtkAction   *action,
 }
 
 
-static void
-update_current (GtkTextBuffer *doc,
-		gint           current)
-{
-	GtkTextIter iter;
-	GtkTextIter end_iter;
-
-	g_return_if_fail (doc != NULL);
-	g_return_if_fail (current >= 0);
-
-	gtk_text_buffer_get_iter_at_offset (GTK_TEXT_BUFFER (doc), 
-					    &iter, current);
-
-	if (!gtk_text_iter_inside_word (&iter))
-	{	
-		/* if we're not inside a word,
-		 * we must be in some spaces.
-		 * skip forward to the beginning of the next word. */
-
-		if (!gtk_text_iter_is_end (&iter))
-		{
-			gtk_text_iter_forward_word_end (&iter);
-			gtk_text_iter_backward_word_start (&iter);	
-		}
-	}
-	else
-	{
-		if (!gtk_text_iter_starts_word (&iter))
-			gtk_text_iter_backward_word_start (&iter);	
-	}
-	 
-	gtk_text_buffer_move_mark (GTK_TEXT_BUFFER (doc),
-					   current_mark,
-					   &iter);
-}
-
-
-
-static gchar *
-get_current_word (GtkTextBuffer *doc, gint *start, gint *end)
-{
-	GtkTextIter end_iter;
-	GtkTextIter current_iter;
-	gint cursor_position;
-
-	g_return_val_if_fail (doc != NULL, NULL);
-	g_return_val_if_fail (start != NULL, NULL);
-	g_return_val_if_fail (end != NULL, NULL);
-	
-	gtk_text_buffer_get_iter_at_mark (doc, &current_iter, current_mark);
-	gtk_text_buffer_get_end_iter (doc, &end_iter);
-
-	end_iter = current_iter;
-	
-
-	if (!gtk_text_iter_is_start (&current_iter) && !gtk_text_iter_starts_word (&current_iter))
-	{
-		gtk_text_iter_backward_word_start (&current_iter);
-	}
-
-	if (!gtk_text_iter_is_end (&end_iter) && !gtk_text_iter_ends_word (&end_iter))
-	{
-		gtk_text_iter_forward_word_end (&end_iter);
-	}
-
-	*start = gtk_text_iter_get_offset (&current_iter);
-	*end = gtk_text_iter_get_offset (&end_iter);
-
-	gtk_text_buffer_move_mark (doc, current_mark, &end_iter);
-							   
-	g_warning ("Current word extends [%d, %d]", *start, *end);
-/*
-	if (!(*start < *end))
-		return NULL;
-*/
-	return gtk_text_buffer_get_slice (GTK_TEXT_BUFFER (doc),
-					  &current_iter,
-					  &end_iter,
-					  TRUE);
-}
-
-/**
- * goto_next_word:
- * @doc: a #GtkTextBuffer
- * 
- * Checks the existence of next word.
- *
- * Returns: FALSE if next word exists, TRUE if next word is get
- */
-
-static gboolean
-goto_next_word (GtkTextBuffer *doc)
-{
-	GtkTextIter current_iter;
-	GtkTextIter old_current_iter;
-	GtkTextIter check_iter;
-	GtkTextIter end_iter;
-	GtkTextIter start_iter;
-	gboolean last_word = FALSE;
-
-	g_return_val_if_fail (doc != NULL, FALSE);
-
-	gtk_text_buffer_get_iter_at_mark (doc, &current_iter, current_mark);
-	gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (doc), &end_iter);
-	gtk_text_buffer_get_start_iter (GTK_TEXT_BUFFER (doc), &start_iter);
-
-	/* If it's first time goto_next_word called return */
-	if (gtk_text_iter_compare (&current_iter, &start_iter) == 0)
-		return TRUE;
-	
-	if (gtk_text_iter_compare (&current_iter, &end_iter) >= 0)
-		return FALSE;
-	
-	old_current_iter = current_iter;	
-	/* Check if this is last word. */
-	check_iter = current_iter;
-	gtk_text_iter_forward_word_ends (&current_iter, 1);
-	gtk_text_iter_forward_word_ends (&check_iter, 2);
-	if (gtk_text_iter_compare (&current_iter, &check_iter) == 0)
-	{
-		go_to_next_message ();
-		update_current (doc, 0);
-		return goto_next_word (doc);
-	}
-	
-	current_iter = old_current_iter;
-	/* If iter is at the end of word don't go twice */
-	if (gtk_text_iter_ends_word (&current_iter))
-	{
-		last_word = TRUE;
-		gtk_text_iter_forward_word_end (&current_iter);
-	}
-	else
-	{
-		last_word = FALSE;
-		gtk_text_iter_forward_word_ends (&current_iter, 2);
-		g_warning ("current position: %d last_word: %d", gtk_text_iter_get_offset (&current_iter), last_word);
-	}
-		
-	gtk_text_iter_backward_word_start (&current_iter);
-
-	if ((gtk_text_iter_compare (&old_current_iter, &current_iter) < 0) &&
-	    (gtk_text_iter_compare (&current_iter, &end_iter) < 0))
-	{
-		update_current (doc, gtk_text_iter_get_offset (&current_iter));
-		return TRUE;
-	}		
-		
-	return FALSE;
-}
-
-static gchar *
-get_next_misspelled_word (GtranslatorView *view)
-{
-	GtkTextBuffer *doc;
-	GtranslatorTab *tab;
-	GtranslatorWindow *window;
-	gint start, end;
-	gchar *word;
-	GtranslatorSpellChecker *spell;
-
-	g_return_val_if_fail (view != NULL, NULL);
-
-	doc = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
-	g_return_val_if_fail (doc != NULL, NULL);
-
-	window = gtranslator_application_get_active_window (GTR_APP);
-	tab = gtranslator_window_get_active_tab (window);
-	g_return_val_if_fail (tab != NULL, NULL);
-	
-	spell = get_spell_checker_from_tab (tab);
-	g_return_val_if_fail (spell != NULL, NULL);
-
-	goto_next_word (doc);
-	word = get_current_word (doc, &start, &end);
-	if (word == NULL)
-		return NULL;
-
-	while (gtranslator_spell_checker_check_word (spell, word, -1))
-	{
-		g_free (word);
-
-		if (!goto_next_word (doc))
-			return NULL;
-
-		/* may return null if we reached the end of the selection */
-		word = get_current_word (doc, &start, &end);
-		if (word == NULL)
-			return NULL;
-		
-	}
-
-	/*
-	if (!goto_next_word (doc))
-		update_current (doc, gtk_text_buffer_get_char_count (GTK_TEXT_BUFFER (doc)));
-*/
-	if (word != NULL)
-	{
-		GtkTextIter s, e;
-/*
-		range->mw_start = start;
-		range->mw_end = end;
-*/
-		g_warning ("Select [%d, %d]", start, end);
-
-		gtk_text_buffer_get_iter_at_offset (GTK_TEXT_BUFFER (doc), &s, start);
-		gtk_text_buffer_get_iter_at_offset (GTK_TEXT_BUFFER (doc), &e, end);
-
-		gtk_text_buffer_select_range (GTK_TEXT_BUFFER (doc), &s, &e);
-
-		gtk_text_view_scroll_to_iter (GTK_TEXT_VIEW (view),
-									  &e,
-									  0.0,
-									  FALSE,
-									  0.0,
-									  0.0);
-	}
-	else
-	{
-		/*
-		range->mw_start = -1;
-		range->mw_end = -1;
-		 */
-	}
-
-	return word;
-}
-
 static gboolean
 go_to_next_message ()
 {
@@ -488,8 +260,22 @@ go_to_next_message ()
 	
 	if (gtranslator_po_get_messages_count (po) != gtranslator_po_get_message_position (po))
 	{
+		GtranslatorView *view;
+		GtkTextBuffer *buffer;
+		GtkTextIter iter;
+		
 		gtranslator_tab_go_to_next (tab);
 		set_sensitive_according_to_message (window, po);
+		/* Move current_mark to start */
+		view = gtranslator_window_get_active_view (window);
+		buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
+		g_return_val_if_fail (buffer != NULL, FALSE);
+		
+		gtk_text_buffer_get_start_iter (buffer, &iter);
+		gtk_text_buffer_move_mark (buffer, 
+								   current_mark,
+								   &iter);
+		
 		return TRUE;
 	}
 	else
@@ -498,28 +284,104 @@ go_to_next_message ()
 	}
 }
 
+gchar *
+get_next_word (GtranslatorView *view)
+{
+	GtkTextIter current_iter;
+	GtkTextIter end_iter;
+	GtkTextIter old_iter;
+	GtkTextBuffer *buffer;
+	
+	g_return_val_if_fail (view != NULL, NULL);
+
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
+	g_return_val_if_fail (buffer != NULL, NULL);
+	
+	gtk_text_buffer_get_iter_at_mark (buffer,
+									  &current_iter,
+									  current_mark);
+	gtk_text_buffer_get_end_iter (buffer,
+								  &end_iter);
+	gtk_text_iter_backward_word_start (&end_iter);
+	gtk_text_iter_forward_word_end (&end_iter);
+	
+	if (gtk_text_iter_compare (&current_iter, &end_iter) == 0)
+	{
+		gchar *new_word;
+		if (!go_to_next_message ())
+			return NULL;
+		
+		return get_next_word (view);
+	}
+	
+	old_iter = current_iter;
+	gtk_text_iter_forward_word_end (&current_iter);
+	if (gtk_text_iter_compare (&current_iter, &old_iter) == 0)
+	{
+		gtk_text_buffer_move_mark (buffer,
+								   current_mark,
+								   &current_iter);
+		return NULL;
+	}
+	old_iter = current_iter;
+	gtk_text_iter_backward_word_start (&current_iter);
+	gtk_text_buffer_move_mark (buffer,
+							   current_mark,
+							   &old_iter);
+	/* Select the word */
+	gtk_text_buffer_select_range (buffer,
+								  &current_iter,
+								  &old_iter);
+	
+	return gtk_text_buffer_get_slice (buffer,
+									  &current_iter,
+									  &old_iter,
+									  TRUE);
+}
+	
+
+gchar *
+get_next_misspelled_word (GtranslatorSpellCheckerDialog *dlg,
+						  GtranslatorView *view,
+						  GtranslatorSpellChecker *spell)
+{
+	gchar *word;
+	
+	g_return_val_if_fail (view != NULL, NULL);
+
+	word = get_next_word (view);
+	while (gtranslator_spell_checker_check_word (spell, word, -1)) 
+	{
+		g_free (word);
+		word = get_next_word (view);
+	}
+	
+	if (word == NULL)
+		gtranslator_spell_checker_dialog_set_completed (dlg);
+	
+	return word;
+	
+}
+
 static void
 ignore_cb (GtranslatorSpellCheckerDialog *dlg,
 		   const gchar *w,
 		   GtranslatorView *view)
 {
 	gchar *word = NULL;
+	GtranslatorSpellChecker *spell;
 
-	
 	g_return_if_fail (w != NULL);
 	g_return_if_fail (view != NULL);
 	
-	word = get_next_misspelled_word (view);
-	if (word == NULL)
-	{	
-			gtranslator_spell_checker_dialog_set_completed (dlg);
-			return;
-	}
-
+	spell = gtranslator_spell_checker_dialog_get_spell_checker (dlg);
+	
+	word = get_next_misspelled_word (dlg, view, spell);
+	
+	
 	gtranslator_spell_checker_dialog_set_misspelled_word (GTRANSLATOR_SPELL_CHECKER_DIALOG (dlg),
 							word,
 							-1);
-
 	g_free (word);
 		
 }
@@ -550,14 +412,14 @@ check_spelling_cb (GtkAction	*action,
 	
 	spell = get_spell_checker_from_tab (tab);
 	g_return_if_fail (spell != NULL);
-
-	word = get_next_misspelled_word (view);
-	
-	
+		
 	dlg = gtranslator_spell_checker_dialog_new_from_spell_checker (spell);
 	gtk_window_set_modal (GTK_WINDOW (dlg), TRUE);
 	gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (window));
 	
+	word = get_next_misspelled_word (GTRANSLATOR_SPELL_CHECKER_DIALOG(dlg), 
+									 view, 
+									 spell);
 	gtranslator_spell_checker_dialog_set_misspelled_word (GTRANSLATOR_SPELL_CHECKER_DIALOG (dlg),
 							word,
 							-1);

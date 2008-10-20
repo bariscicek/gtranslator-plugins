@@ -323,6 +323,8 @@ gtranslator_spell_checker_dialog_init (GtranslatorSpellCheckerDialog *dlg)
 	
 	/* Message preview text view */
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (dlg->message_preview), GTK_WRAP_WORD_CHAR);
+	gtk_text_view_set_right_margin (GTK_TEXT_VIEW (dlg->message_preview), 15);
+	gtk_text_view_set_left_margin (GTK_TEXT_VIEW (dlg->message_preview), 5);
 	gtk_text_view_set_editable (GTK_TEXT_VIEW (dlg->message_preview), FALSE);
 	gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW (dlg->message_preview), FALSE);
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (dlg->message_preview));

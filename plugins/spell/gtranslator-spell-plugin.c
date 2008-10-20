@@ -374,6 +374,12 @@ get_next_word (GtranslatorSpellCheckerDialog *dlg,
 									   "high_light",
 									   &start_iter,
 									   &end_iter);
+	gtk_text_view_scroll_to_iter (dlg_view, 
+								  &start_iter,
+								  0.0,
+								  TRUE,
+								  0.0,
+								  0.5);
 	
 	g_free (buffer_text);
 							  
@@ -386,14 +392,17 @@ get_next_word (GtranslatorSpellCheckerDialog *dlg,
 
 gchar *
 get_next_misspelled_word (GtranslatorSpellCheckerDialog *dlg,
-						  GtranslatorView *view,
-						  GtranslatorSpellChecker *spell)
+						  GtranslatorView *view)
 {
 	gchar *word;
+	GtranslatorSpellChecker *spell;
 	
 	g_return_val_if_fail (view != NULL, NULL);
 
 	word = get_next_word (dlg, view);
+	spell = gtranslator_spell_checker_dialog_get_spell_checker (GTRANSLATOR_SPELL_CHECKER_DIALOG (dlg));
+	g_return_val_if_fail (spell != NULL, NULL);
+	
 	while (gtranslator_spell_checker_check_word (spell, word, -1)) 
 	{
 		g_free (word);
@@ -420,7 +429,7 @@ ignore_cb (GtranslatorSpellCheckerDialog *dlg,
 	
 	spell = gtranslator_spell_checker_dialog_get_spell_checker (dlg);
 	
-	word = get_next_misspelled_word (dlg, view, spell);
+	word = get_next_misspelled_word (dlg, view);
 	
 	
 	gtranslator_spell_checker_dialog_set_misspelled_word (GTRANSLATOR_SPELL_CHECKER_DIALOG (dlg),
@@ -430,6 +439,31 @@ ignore_cb (GtranslatorSpellCheckerDialog *dlg,
 		
 }
 
+static void
+ignore_all_cb (GtranslatorSpellCheckerDialog *dlg,
+			   const gchar *w,
+			   GtranslatorView *view)
+{
+	gchar *word = NULL;
+	GtranslatorSpellChecker *spell;
+	
+	g_return_if_fail (w != NULL);
+	g_return_if_fail (view != NULL);
+	
+	spell = gtranslator_spell_checker_dialog_get_spell_checker (dlg);
+	
+	/* Add word to current session */
+	gtranslator_spell_checker_add_word_to_session (spell,
+												   w,
+												   -1);
+	
+	word = get_next_misspelled_word (dlg, view);
+	
+	gtranslator_spell_checker_dialog_set_misspelled_word (GTRANSLATOR_SPELL_CHECKER_DIALOG (dlg),
+														  word,
+														  -1);
+	g_free (word);
+}
 
 static void
 check_spelling_cb (GtkAction	*action,
@@ -462,14 +496,18 @@ check_spelling_cb (GtkAction	*action,
 	gtk_window_set_transient_for (GTK_WINDOW (dlg), GTK_WINDOW (window));
 	
 	word = get_next_misspelled_word (GTRANSLATOR_SPELL_CHECKER_DIALOG(dlg), 
-									 view, 
-									 spell);
+									 view);
 	gtranslator_spell_checker_dialog_set_misspelled_word (GTRANSLATOR_SPELL_CHECKER_DIALOG (dlg),
 							word,
 							-1);
-	g_signal_connect (dlg, "ignore", G_CALLBACK (ignore_cb), view);
-	
-	
+	g_signal_connect (dlg, 
+					  "ignore", 
+					  G_CALLBACK (ignore_cb), 
+					  view);
+	g_signal_connect (dlg, 
+					  "ignore_all", 
+					  G_CALLBACK (ignore_all_cb), 
+					  view);
 	
 	gtk_widget_show (dlg);
 }

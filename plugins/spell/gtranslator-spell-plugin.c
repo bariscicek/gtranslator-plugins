@@ -285,23 +285,42 @@ go_to_next_message ()
 }
 
 gchar *
-get_next_word (GtranslatorView *view)
+get_next_word (GtranslatorSpellCheckerDialog *dlg,
+			   GtranslatorView *view)
 {
 	GtkTextIter current_iter;
-	GtkTextIter end_iter;
+	GtkTextIter start_iter, end_iter;
 	GtkTextIter old_iter;
 	GtkTextBuffer *buffer;
+	GtkTextView *dlg_view;
+	GtkTextBuffer *dlg_buffer;
+	gchar *buffer_text;
 	
 	g_return_val_if_fail (view != NULL, NULL);
+	g_return_val_if_fail (dlg != NULL, NULL);
 
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
 	g_return_val_if_fail (buffer != NULL, NULL);
 	
+	dlg_view = gtranslator_spell_checker_dialog_get_view (dlg);
+	g_return_val_if_fail (dlg_view != NULL, NULL);
+	
+	dlg_buffer = gtk_text_view_get_buffer (dlg_view);
+	g_return_val_if_fail (dlg_buffer != NULL, NULL);
+	
 	gtk_text_buffer_get_iter_at_mark (buffer,
 									  &current_iter,
 									  current_mark);
-	gtk_text_buffer_get_end_iter (buffer,
-								  &end_iter);
+	gtk_text_buffer_get_bounds (buffer,
+								&start_iter,
+								&end_iter);
+	
+	/* Get buffer text for dlg message preview */
+	buffer_text = gtk_text_buffer_get_text (buffer,
+											&start_iter,
+											&end_iter,
+											FALSE);
+	
 	gtk_text_iter_backward_word_start (&end_iter);
 	gtk_text_iter_forward_word_end (&end_iter);
 	
@@ -311,7 +330,7 @@ get_next_word (GtranslatorView *view)
 		if (!go_to_next_message ())
 			return NULL;
 		
-		return get_next_word (view);
+		return get_next_word (dlg, view);
 	}
 	
 	old_iter = current_iter;
@@ -333,6 +352,31 @@ get_next_word (GtranslatorView *view)
 								  &current_iter,
 								  &old_iter);
 	
+	/* Update dlg message_preview */
+	gtk_text_buffer_begin_user_action (dlg_buffer);
+	gtk_text_buffer_set_text (dlg_buffer,
+							  buffer_text,
+							  -1);
+	/* Remove all tags on dlg_buffer and add current word buffer */
+	gtk_text_buffer_get_bounds (dlg_buffer,
+								&start_iter,
+								&end_iter);
+	gtk_text_buffer_remove_all_tags (dlg_buffer,
+									&start_iter,
+									&end_iter);
+	gtk_text_buffer_get_iter_at_offset (dlg_buffer,
+										&start_iter,
+										gtk_text_iter_get_offset (&current_iter));
+	gtk_text_buffer_get_iter_at_offset (dlg_buffer,
+										&end_iter,
+										gtk_text_iter_get_offset (&old_iter));
+	gtk_text_buffer_apply_tag_by_name (dlg_buffer,
+									   "high_light",
+									   &start_iter,
+									   &end_iter);
+	
+	g_free (buffer_text);
+							  
 	return gtk_text_buffer_get_slice (buffer,
 									  &current_iter,
 									  &old_iter,
@@ -349,11 +393,11 @@ get_next_misspelled_word (GtranslatorSpellCheckerDialog *dlg,
 	
 	g_return_val_if_fail (view != NULL, NULL);
 
-	word = get_next_word (view);
+	word = get_next_word (dlg, view);
 	while (gtranslator_spell_checker_check_word (spell, word, -1)) 
 	{
 		g_free (word);
-		word = get_next_word (view);
+		word = get_next_word (dlg, view);
 	}
 	
 	if (word == NULL)

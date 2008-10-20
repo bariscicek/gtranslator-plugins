@@ -239,6 +239,7 @@ gtranslator_spell_checker_dialog_init (GtranslatorSpellCheckerDialog *dlg)
 {
 	GtkWidget *error_widget;
 	GtkWidget *content;
+	GtkTextBuffer *buffer;
 	GtkTreeViewColumn *column;
 	GtkCellRenderer *cell;
 	GtkTreeSelection *selection;
@@ -319,6 +320,20 @@ gtranslator_spell_checker_dialog_init (GtranslatorSpellCheckerDialog *dlg)
 	gtk_widget_grab_default (dlg->change_button);
 
 	gtk_entry_set_activates_default (GTK_ENTRY (dlg->word_entry), TRUE);
+	
+	/* Message preview text view */
+	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (dlg->message_preview), GTK_WRAP_WORD_CHAR);
+	gtk_text_view_set_editable (GTK_TEXT_VIEW (dlg->message_preview), FALSE);
+	gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW (dlg->message_preview), FALSE);
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (dlg->message_preview));
+	/* Create red text tag for current word in message preview */
+	gtk_text_buffer_create_tag (buffer,
+				    "high_light",
+				    "background",
+				    "yellow",
+				    "weight",
+				    PANGO_WEIGHT_BOLD,
+				    NULL);
 
 	/* Connect signals */
 	

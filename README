@@ -1,11 +1,24 @@
 gtranslator-plugins
 -------------------
 
-This project aims to hold collection of useful, additional plugins to gtranslator (gtranslator.sourceforge.net). 
+This project aims to hold collection of useful, additional plugins to 
+gtranslator (gtranslator.sourceforge.net). 
 
 List of current plugins:
-* punctuation: Checks the last character of translations so as to compare them for punctuation equality (ie. both strings ends with dot etc.) It has extra features such as ignoring tags and detecting three dots.
+* punctuation: Checks the last character of translations so as to compare 
+them for punctuation equality (ie. both strings ends with dot etc.) It has 
+extra features such as ignoring tags and detecting three dots.
 
-* spell: Spell check current translation and whole po file using enchant spell checking library similar to gedit. 
+* spell: Spell check current translation and whole po file using enchant 
+spell checking library similar to gedit. 
 
+How to install
+--------------
 
+You need to use autoreconf first in order to prepare necessary autoconf 
+files. What needs to be done in order is following:
+
+$ autoreconf
+$ ./configure --with-all-plugins
+$ make
+# make install

@@ -445,7 +445,6 @@ ignore_all_cb (GtranslatorSpellCheckerDialog *dlg,
 			   const gchar *w,
 			   GtranslatorView *view)
 {
-	gchar *word = NULL;
 	GtranslatorSpellChecker *spell;
 	
 	g_return_if_fail (w != NULL);
@@ -457,13 +456,8 @@ ignore_all_cb (GtranslatorSpellCheckerDialog *dlg,
 	gtranslator_spell_checker_add_word_to_session (spell,
 												   w,
 												   -1);
+	ignore_cb (dlg, w, view);
 	
-	word = get_next_misspelled_word (dlg, view);
-	
-	gtranslator_spell_checker_dialog_set_misspelled_word (GTRANSLATOR_SPELL_CHECKER_DIALOG (dlg),
-														  word,
-														  -1);
-	g_free (word);
 }
 
 static void
@@ -475,7 +469,6 @@ change_cb (GtranslatorSpellCheckerDialog *dlg,
 	GtkTextIter sel_s, sel_e;
 	GtkTextBuffer *buffer;
 	GtranslatorSpellChecker *spell; 
-	gchar *word;
 	gint offset;
 	
 	g_return_if_fail (view != NULL);
@@ -488,28 +481,60 @@ change_cb (GtranslatorSpellCheckerDialog *dlg,
 	gtk_text_buffer_get_selection_bounds (buffer,
 										  &sel_s,
 										  &sel_e);
-	offset = gtk_text_iter_get_offset (&sel_s);
 	
+	offset = gtk_text_iter_get_offset (&sel_s);
 	gtk_text_buffer_begin_user_action (buffer);
-	gtk_text_buffer_delete_selection (buffer,
-									  FALSE,
-									  TRUE);
-	gtk_text_buffer_get_iter_at_offset (buffer,
-										&sel_s,
-										offset);
+	gtk_text_buffer_delete_selection (buffer, FALSE, TRUE);
+	gtk_text_buffer_get_iter_at_offset (buffer, &sel_s, offset);
 	gtk_text_buffer_insert (buffer,
 							&sel_s,
 							c,
 							-1);
 	gtk_text_buffer_end_user_action (buffer);
 	
-	spell = gtranslator_spell_checker_dialog_get_spell_checker (dlg);
-	word = get_next_misspelled_word (dlg, view);
+	ignore_cb (dlg, w, view);
+}
+
+static void
+change_all_cb (GtranslatorSpellCheckerDialog *dlg,
+			   const gchar *w,
+			   const gchar *c,
+			   GtranslatorView *view)
+{
+	GtkTextIter s, e;
+	GtkTextIter start_iter, end_iter;
+	GtkTextBuffer *buffer;
+	GtranslatorSpellChecker *spell;
+	gint offset;
 	
-	gtranslator_spell_checker_dialog_set_misspelled_word (GTRANSLATOR_SPELL_CHECKER_DIALOG (dlg),
-														  word,
-														  -1);
-	g_free (word);	
+	g_return_if_fail (w != NULL);
+	g_return_if_fail (c != NULL);
+	g_return_if_fail (view != NULL);
+	
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
+	g_return_if_fail (buffer != NULL);
+	
+	gtk_text_buffer_get_end_iter (buffer, &end_iter);
+	gtk_text_buffer_get_iter_at_mark (buffer, &start_iter, current_mark);
+	gtk_text_iter_backward_word_start (&start_iter);
+	
+	while (gtk_text_iter_forward_search (&start_iter,
+										 w,
+										 GTK_TEXT_SEARCH_TEXT_ONLY,
+										 &s,
+										 &e,
+										 &end_iter))
+	{
+		offset = gtk_text_iter_get_offset (&s);
+		gtk_text_buffer_delete (buffer, &s, &e);
+		gtk_text_buffer_get_iter_at_offset (buffer, &s, offset);
+		gtk_text_buffer_insert (buffer, &s, c, -1);
+		/* Restore iters due to buffer change */
+		gtk_text_buffer_get_end_iter (buffer, &end_iter);
+		gtk_text_buffer_get_iter_at_offset (buffer, &start_iter, offset + g_utf8_strlen (c, -1));		
+	}
+	ignore_cb (dlg, w, view);
+	
 }
 
 
@@ -518,7 +543,6 @@ learn_cb (GtranslatorSpellCheckerDialog *dlg,
 			   const gchar *w,
 			   GtranslatorView *view)
 {
-	gchar *word = NULL;
 	GtranslatorSpellChecker *spell;
 	
 	g_return_if_fail (w != NULL);
@@ -531,12 +555,7 @@ learn_cb (GtranslatorSpellCheckerDialog *dlg,
 												    w,
 												    -1);
 	
-	word = get_next_misspelled_word (dlg, view);
-	
-	gtranslator_spell_checker_dialog_set_misspelled_word (GTRANSLATOR_SPELL_CHECKER_DIALOG (dlg),
-														  word,
-														  -1);
-	g_free (word);
+	ignore_cb (dlg, w, view);
 }
 
 
@@ -587,6 +606,10 @@ check_spelling_cb (GtkAction	*action,
 	g_signal_connect (dlg,
 					  "change",
 					  G_CALLBACK (change_cb),
+					  view);
+	g_signal_connect (dlg,
+					  "change_all",
+					  G_CALLBACK (change_all_cb),
 					  view);
 	g_signal_connect (dlg,
 					  "add_word_to_personal",
